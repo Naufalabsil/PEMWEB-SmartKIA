@@ -21,6 +21,11 @@ export interface MotherProfile {
   beratBadan: number;
   tinggiBadan: number;
   nomorWa: string;
+  /** Extended fields — null jika belum diisi di Supabase */
+  golonganDarah: string | null;
+  alamat: string | null;
+  namaSuami: string | null;
+  tanggalLahir: string | null;
 }
 
 export interface ChildProfile {
@@ -29,8 +34,11 @@ export interface ChildProfile {
   usia: string;
   beratBadan: number;
   tinggiBadan: number;
-  tanggalPemeriksaan: string;
-  statusGizi: string;
+  /** null jika belum pernah ada data pertumbuhan */
+  tanggalPemeriksaan: string | null;
+  statusGizi: string | null;
+  tanggalLahir: string | null;
+  jenisKelamin: "L" | "P";
 }
 
 export interface KbRecord {
@@ -62,8 +70,11 @@ export interface DashboardData {
   growthBbu: GrowthPoint[];
   growthBbpb: GrowthPoint[];
   kbRecords: KbRecord[];
-  nextKb: KbRecord;
-  nextVaccine: VaccineRecord;
+  /** null jika belum ada catatan KB sama sekali */
+  nextKb: KbRecord | null;
+  /** null jika semua vaksin sudah diberikan */
+  nextVaccine: VaccineRecord | null;
+  allVaccines: VaccineRecord[];
   education: EducationItem[];
   bookUrl: string;
 }

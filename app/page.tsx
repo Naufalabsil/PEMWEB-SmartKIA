@@ -18,44 +18,68 @@ export default function LoginPage() {
   const [countdown, setCountdown] = useState(300);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [debugCode, setDebugCode] = useState<string | undefined>();
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const normalizedPhone = useMemo(() => normalizeIndonesianWa(phone), [phone]);
   const otpCode = otp.join("");
   const canSubmitPhone = normalizedPhone.length >= 10;
   const canSubmitOtp = otpCode.length === OTP_LENGTH;
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    if (step !== "otp") {
-      return;
-    }
-
+    if (step !== "otp") return;
     const timer = window.setInterval(() => {
-      setCountdown((current) => Math.max(0, current - 1));
+      setCountdown((c) => Math.max(0, c - 1));
     }, 1000);
-
     return () => window.clearInterval(timer);
   }, [step]);
+
+    useEffect(() => {
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    if (
+      params.get("error") ===
+      "nomor-tidak-terdaftar"
+    ) {
+      setShowModal(true);
+
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname
+      );
+    }
+  }, []);
 
   async function handleSendOtp() {
     if (!canSubmitPhone) {
       setError("Masukkan nomor WhatsApp yang valid.");
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
-      const result = await requestOtp(normalizedPhone);
-      setDebugCode(result.debugCode);
+      await requestOtp(normalizedPhone);
       setStep("otp");
       setCountdown(300);
       setOtp(Array(OTP_LENGTH).fill(""));
       window.setTimeout(() => inputRefs.current[0]?.focus(), 80);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Kode OTP gagal dikirim.");
+      } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Kode OTP gagal dikirim.";
+
+      if (
+        message.includes("belum terdaftar") ||
+        message.includes("tidak terdaftar")
+      ) {
+        setShowModal(true);
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -66,10 +90,8 @@ export default function LoginPage() {
       setError("Lengkapi 6 digit kode OTP.");
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
       await verifyOtp(normalizedPhone, otpCode);
       router.push("/beranda");
@@ -85,7 +107,6 @@ export default function LoginPage() {
     const next = [...otp];
     next[index] = value;
     setOtp(next);
-
     if (value && index < OTP_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -107,28 +128,29 @@ export default function LoginPage() {
           <div className="otp-logo" />
           <div className="otp-panel">
             <h2>Masukkan Kode OTP</h2>
-            <p>Kode 6 digit dikirim ke WhatsApp</p>
+            <p>
+              Kode 6 digit dikirim ke WhatsApp{" "}
+              <strong>+{normalizedPhone}</strong>
+            </p>
 
             <div className="otp-grid" aria-label="Kode OTP">
               {otp.map((digit, index) => (
                 <input
                   key={index}
-                  ref={(node) => {
-                    inputRefs.current[index] = node;
-                  }}
+                  ref={(node) => { inputRefs.current[index] = node; }}
                   aria-label={`Digit OTP ${index + 1}`}
                   inputMode="numeric"
                   maxLength={1}
                   value={digit}
-                  onChange={(event) => handleOtpChange(index, event)}
-                  onKeyDown={(event) => handleOtpKey(index, event)}
+                  onChange={(e) => handleOtpChange(index, e)}
+                  onKeyDown={(e) => handleOtpKey(index, e)}
                 />
               ))}
             </div>
 
             <div className="otp-meta">
               <span>
-                Kirim ulang kode dalam <b>{minutes}:{seconds}</b>
+                Kirim ulang dalam <b>{minutes}:{seconds}</b>
               </span>
               <button
                 className="ghost-button"
@@ -138,7 +160,6 @@ export default function LoginPage() {
               >
                 Kirim ulang OTP
               </button>
-              {debugCode ? <span>Kode demo: <b>{debugCode}</b></span> : null}
             </div>
 
             <button
@@ -172,13 +193,13 @@ export default function LoginPage() {
           </div>
           <div>
             <h1>Posyandu Digital</h1>
-            <p>Pantau kesehatan ibu & anak dengan mudah dan terpadu</p>
+            <p>Pantau kesehatan ibu &amp; anak dengan mudah dan terpadu</p>
           </div>
         </div>
 
         <div className="login-card">
           <h2>Masuk ke Akun Anda</h2>
-          <p>Masukkan nomor WhatsApp yang terdaftar</p>
+          <p>Masukkan nomor WhatsApp yang terdaftar di Posyandu</p>
 
           <label className="input-label" htmlFor="nomor-wa">
             Nomor WhatsApp
@@ -193,12 +214,8 @@ export default function LoginPage() {
               inputMode="tel"
               placeholder="812-3456-7890"
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  void handleSendOtp();
-                }
-              }}
+              onChange={(e) => setPhone(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") void handleSendOtp(); }}
             />
           </div>
           <div className="helper-text">Kode OTP akan dikirim via WhatsApp</div>
@@ -220,6 +237,35 @@ export default function LoginPage() {
           ) : null}
         </div>
       </section>
+      {showModal && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <div className="modal-icon">
+              <AlertTriangle size={34} />
+            </div>
+
+            <h3 className="modal-title">
+              Nomor Tidak Terdaftar
+            </h3>
+
+            <p className="modal-description">
+              Maaf, nomor WhatsApp Anda belum
+              terdaftar dalam sistem Posyandu.
+              Silakan menghubungi bidan untuk
+              proses pendaftaran akun.
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="modal-button"
+                onClick={() => setShowModal(false)}
+              >
+                Mengerti
+              </button>
+            </div>
+          </div>
+        </div>
+    )}
     </MobileShell>
   );
 }

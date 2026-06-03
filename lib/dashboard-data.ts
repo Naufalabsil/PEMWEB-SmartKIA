@@ -1,6 +1,5 @@
-import { createDemoDashboard, KIA_BOOK_URL } from "@/lib/demo-data";
 import { addDays, daysBetween, toISODate } from "@/lib/date";
-import { createSupabaseBrowserClient, hasSupabaseConfig } from "@/lib/supabase-browser";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type { DashboardData, KbRecord, SmartKiaSession, TimelineStatus } from "@/lib/types";
 
 type IbuRow = {
@@ -8,12 +7,18 @@ type IbuRow = {
   nama_lengkap: string;
   nomor_wa: string;
   tanggal_lahir: string | null;
+  golongan_darah: string | null;
+  alamat: string | null;
+  nama_suami: string | null;
+  berat_badan: number | null;
+  tinggi_badan: number | null;
 };
 
 type AnakRow = {
   id: string;
   nama_anak: string;
   tanggal_lahir: string | null;
+  jenis_kelamin: "L" | "P";
 };
 
 type PertumbuhanRow = {
@@ -42,41 +47,77 @@ type VaccineRow = {
   jadwal_ideal: string;
 };
 
-export async function loadDashboardData(session: SmartKiaSession | null): Promise<DashboardData> {
-  if (!session || !hasSupabaseConfig()) {
-    return createDemoDashboard();
+export class DashboardLoadError extends Error {
+  constructor(
+    public readonly code:
+      | "NO_SESSION"
+      | "NO_SUPABASE"
+      | "NO_PROFILE"
+      | "NO_CHILD"
+      | "FETCH_ERROR",
+    message: string,
+  ) {
+    super(message);
+    this.name = "DashboardLoadError";
+  }
+}
+
+export async function loadDashboardData(
+  session: SmartKiaSession | null,
+): Promise<DashboardData> {
+  if (!session) {
+    throw new DashboardLoadError("NO_SESSION", "Sesi tidak ditemukan. Silakan login kembali.");
   }
 
   const supabase = createSupabaseBrowserClient(session.accessToken);
   if (!supabase) {
-    return createDemoDashboard();
+    throw new DashboardLoadError(
+      "NO_SUPABASE",
+      "Konfigurasi Supabase tidak ditemukan. Hubungi administrator.",
+    );
   }
 
   try {
+    // --- Profil Ibu ---
     const { data: ibu, error: ibuError } = await supabase
       .from("ibu")
-      .select("id,nama_lengkap,nomor_wa,tanggal_lahir")
+      .select(
+        "id,nama_lengkap,nomor_wa,tanggal_lahir,golongan_darah,alamat,nama_suami,berat_badan,tinggi_badan",
+      )
       .eq("id", session.ibuId)
       .single<IbuRow>();
 
     if (ibuError || !ibu) {
-      return createDemoDashboard();
+      throw new DashboardLoadError(
+        "NO_PROFILE",
+        "Profil ibu tidak ditemukan. Hubungi petugas Posyandu.",
+      );
     }
 
-    const { data: anakRows } = await supabase
+    // --- Profil Anak ---
+    const { data: anakRows, error: anakError } = await supabase
       .from("anak")
-      .select("id,nama_anak,tanggal_lahir")
+      .select("id,nama_anak,tanggal_lahir,jenis_kelamin")
       .eq("ibu_id", ibu.id)
       .order("created_at", { ascending: true })
       .limit(1)
       .returns<AnakRow[]>();
 
-    const anak = anakRows?.[0];
-    if (!anak) {
-      return createDemoDashboard();
+    if (anakError || !anakRows?.length) {
+      throw new DashboardLoadError(
+        "NO_CHILD",
+        "Data anak belum terdaftar. Hubungi petugas Posyandu.",
+      );
     }
 
-    const [{ data: growthRows }, { data: kbRows }, { data: vaccineRows }] = await Promise.all([
+    const anak = anakRows[0];
+
+    // --- Ambil semua data parallel ---
+    const [
+      { data: growthRows, error: growthError },
+      { data: kbRows, error: kbError },
+      { data: vaccineRows, error: vaccineError },
+    ] = await Promise.all([
       supabase
         .from("pertumbuhan_anak")
         .select(
@@ -99,50 +140,64 @@ export async function loadDashboardData(session: SmartKiaSession | null): Promis
         .returns<VaccineRow[]>(),
     ]);
 
+    if (growthError) throw new DashboardLoadError("FETCH_ERROR", growthError.message);
+    if (kbError) throw new DashboardLoadError("FETCH_ERROR", kbError.message);
+    if (vaccineError) throw new DashboardLoadError("FETCH_ERROR", vaccineError.message);
+
     const today = new Date();
+
+    // --- KB Records ---
     const kbRecords = (kbRows ?? []).map<KbRecord>((row) => ({
       id: row.id,
       jenisKb: row.jenis_kb,
       tanggalSuntik: row.tanggal_suntik,
       tanggalBerikutnya: row.tanggal_berikutnya,
-      catatan: row.catatan ?? "Catatan belum diisi",
+      catatan: row.catatan ?? "-",
       status: getKbStatus(row.tanggal_berikutnya, today),
     }));
 
     const nextKb =
-      kbRecords.find((record) => record.status === "overdue") ??
-      kbRecords.find((record) => record.status === "next") ??
+      kbRecords.find((r) => r.status === "overdue") ??
+      kbRecords.find((r) => r.status === "next") ??
       kbRecords[kbRecords.length - 1] ??
-      createDemoDashboard().nextKb;
+      null;
 
-    const lastGrowth = growthRows?.[growthRows.length - 1];
-    const demo = createDemoDashboard();
-
+    // --- Vaksin berikutnya ---
     const nextVaccineRow =
-      vaccineRows?.find((row) => !row.tanggal_diberikan && daysBetween(today, new Date(row.jadwal_ideal)) >= 0) ??
-      vaccineRows?.find((row) => !row.tanggal_diberikan);
+      (vaccineRows ?? []).find(
+        (r) => !r.tanggal_diberikan && daysBetween(today, new Date(r.jadwal_ideal)) >= 0,
+      ) ?? (vaccineRows ?? []).find((r) => !r.tanggal_diberikan);
+
+    // --- Pertumbuhan terakhir ---
+    const lastGrowth = (growthRows ?? [])[(growthRows ?? []).length - 1] ?? null;
 
     return {
       mother: {
         id: ibu.id,
         nama: ibu.nama_lengkap,
-        usia: ibu.tanggal_lahir ? `${ageInYears(ibu.tanggal_lahir)} tahun` : demo.mother.usia,
-        beratBadan: demo.mother.beratBadan,
-        tinggiBadan: demo.mother.tinggiBadan,
+        usia: ibu.tanggal_lahir ? `${ageInYears(ibu.tanggal_lahir)} tahun` : "-",
+        beratBadan: ibu.berat_badan ?? 0,
+        tinggiBadan: ibu.tinggi_badan ?? 0,
         nomorWa: ibu.nomor_wa,
+        golonganDarah: ibu.golongan_darah ?? null,
+        alamat: ibu.alamat ?? null,
+        namaSuami: ibu.nama_suami ?? null,
+        tanggalLahir: ibu.tanggal_lahir ?? null,
       },
       child: {
         id: anak.id,
         nama: anak.nama_anak,
-        usia: anak.tanggal_lahir ? `${ageInMonths(anak.tanggal_lahir)} bln` : demo.child.usia,
-        beratBadan: Number(lastGrowth?.berat_badan ?? demo.child.beratBadan),
-        tinggiBadan: Number(lastGrowth?.tinggi_badan ?? demo.child.tinggiBadan),
-        tanggalPemeriksaan: lastGrowth?.tanggal_periksa ?? demo.child.tanggalPemeriksaan,
-        statusGizi: lastGrowth?.status_gizi ?? demo.child.statusGizi,
+        usia: anak.tanggal_lahir ? `${ageInMonths(anak.tanggal_lahir)} bln` : "-",
+        beratBadan: lastGrowth ? Number(lastGrowth.berat_badan) : 0,
+        tinggiBadan: lastGrowth ? Number(lastGrowth.tinggi_badan) : 0,
+        tanggalPemeriksaan: lastGrowth?.tanggal_periksa ?? null,
+        statusGizi: lastGrowth?.status_gizi ?? null,
+        tanggalLahir: anak.tanggal_lahir ?? null,
+        jenisKelamin: anak.jenis_kelamin,
       },
-      growthBbu: buildGrowth(growthRows ?? [], "bbu", demo),
-      growthBbpb: buildGrowth(growthRows ?? [], "bbpb", demo),
-      kbRecords: kbRecords.length ? kbRecords : demo.kbRecords,
+      growthBbu: buildGrowth(growthRows ?? [], "bbu"),
+      growthBbpb: buildGrowth(growthRows ?? [], "bbpb"),
+      kbRecords,
       nextKb,
       nextVaccine: nextVaccineRow
         ? {
@@ -152,20 +207,37 @@ export async function loadDashboardData(session: SmartKiaSession | null): Promis
             tanggalDiberikan: nextVaccineRow.tanggal_diberikan,
             jadwalIdeal: nextVaccineRow.jadwal_ideal,
           }
-        : demo.nextVaccine,
-      education: demo.education,
-      bookUrl: KIA_BOOK_URL,
+        : null,
+      allVaccines: (vaccineRows ?? []).map((r) => ({
+        id: r.id,
+        namaVaksin: r.nama_vaksin,
+        urutan: r.urutan,
+        tanggalDiberikan: r.tanggal_diberikan,
+        jadwalIdeal: r.jadwal_ideal,
+      })),
+      education: [
+        {
+          title: "ASI Eksklusif 6 Bulan",
+          subtitle: "Manfaat ASI dan cara menyusui yang benar",
+          category: "Ibu",
+        },
+        {
+          title: "MPASI Pertama Bayi",
+          subtitle: "Kapan dan bagaimana memulai MPASI",
+          category: "Anak",
+        },
+      ],
+      bookUrl: "https://drive.google.com/file/d/18OeWy-0Uh9OkiJjpQ0JFD4F4DXWy2m13/view?usp=sharing",
     };
-  } catch {
-    return createDemoDashboard();
+  } catch (err) {
+    if (err instanceof DashboardLoadError) throw err;
+    throw new DashboardLoadError("FETCH_ERROR", "Gagal memuat data. Coba lagi beberapa saat.");
   }
 }
 
 function getKbStatus(date: string, today: Date): TimelineStatus {
   const diff = daysBetween(today, new Date(date));
-  if (diff < 0) {
-    return "overdue";
-  }
+  if (diff < 0) return "overdue";
   return diff <= 90 ? "next" : "done";
 }
 
@@ -173,27 +245,32 @@ function ageInYears(date: string): number {
   const birth = new Date(date);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age -= 1;
-  }
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age -= 1;
   return Math.max(age, 0);
 }
 
 function ageInMonths(date: string): number {
   const birth = new Date(date);
   const today = new Date();
-  return Math.max(0, (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth());
+  return Math.max(
+    0,
+    (today.getFullYear() - birth.getFullYear()) * 12 +
+      today.getMonth() -
+      birth.getMonth(),
+  );
 }
 
-function buildGrowth(rows: PertumbuhanRow[], mode: "bbu" | "bbpb", demo: DashboardData) {
-  if (!rows.length) {
-    return mode === "bbu" ? demo.growthBbu : demo.growthBbpb;
-  }
-
+function buildGrowth(rows: PertumbuhanRow[], mode: "bbu" | "bbpb") {
   return rows.map((row) => {
-    const axis = mode === "bbu" ? Number(row.usia_bulan ?? 0) : Number(row.tinggi_badan);
-    const median = mode === "bbu" ? estimateMedianBbu(axis) : estimateMedianBbpb(axis);
+    const axis =
+      mode === "bbu"
+        ? Number(row.usia_bulan ?? 0)
+        : Number(row.tinggi_badan);
+    const median =
+      mode === "bbu"
+        ? estimateMedianBbu(axis)
+        : estimateMedianBbpb(axis);
     const spread = mode === "bbu" ? 2.4 : 2.1;
 
     return {
@@ -203,7 +280,9 @@ function buildGrowth(rows: PertumbuhanRow[], mode: "bbu" | "bbpb", demo: Dashboa
       p50: Number(median.toFixed(2)),
       p97: Number((median + spread).toFixed(2)),
       anak: Number(row.berat_badan),
-      zscore: Number((mode === "bbu" ? row.zscore_bbu : row.zscore_bbtb) ?? 0),
+      zscore: Number(
+        ((mode === "bbu" ? row.zscore_bbu : row.zscore_bbtb) ?? 0).toFixed(2),
+      ),
     };
   });
 }
@@ -216,6 +295,9 @@ function estimateMedianBbpb(lengthCm: number): number {
   return Number((3.4 + Math.max(0, lengthCm - 50) * 0.22).toFixed(2));
 }
 
-export function calculateNextKbDate(tanggalSuntik: string, jenisKb: "1_bulan" | "3_bulan"): string {
+export function calculateNextKbDate(
+  tanggalSuntik: string,
+  jenisKb: "1_bulan" | "3_bulan",
+): string {
   return toISODate(addDays(new Date(tanggalSuntik), jenisKb === "1_bulan" ? 28 : 90));
 }
