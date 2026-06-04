@@ -82,12 +82,14 @@ export async function loadDashboardData(
     const { data: ibu, error: ibuError } = await supabase
       .from("ibu")
       .select(
-        "id,nama_lengkap,nomor_wa,tanggal_lahir,golongan_darah,alamat,nama_suami,berat_badan,tinggi_badan",
+        "id,nama_lengkap,nomor_wa,tanggal_lahir,golongan_darah,alamat,nama_suami",
       )
       .eq("id", session.ibuId)
       .single<IbuRow>();
 
     if (ibuError || !ibu) {
+      console.log("IBU DATA:", ibu);
+      console.log("IBU ERROR:", ibuError);
       throw new DashboardLoadError(
         "NO_PROFILE",
         "Profil ibu tidak ditemukan. Hubungi petugas Posyandu.",
@@ -97,7 +99,7 @@ export async function loadDashboardData(
     // --- Profil Anak ---
     const { data: anakRows, error: anakError } = await supabase
       .from("anak")
-      .select("id,nama_anak,tanggal_lahir,jenis_kelamin")
+      .select("id,nama_anak,tanggal_lahir,jenis_kelamin,nama_ayah")
       .eq("ibu_id", ibu.id)
       .order("created_at", { ascending: true })
       .limit(1)
