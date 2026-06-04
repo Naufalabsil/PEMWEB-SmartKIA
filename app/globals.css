@@ -1038,3 +1038,118 @@ button {
     transform: scale(1);
   }
 }
+
+.profile-card {
+  width: 100%;
+  max-width: 700px;
+  background: #f7f7f7;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.profile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  background: #ff448f;
+  border: 1px solid #ebc7d6;
+  border-radius: 16px 16px 0px 0px;
+  padding: 20px;
+}
+
+.profile-card-header-anak {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  background: #2d53ac;
+  border: 1px solid #557bd5;
+  border-radius: 16px 16px 0px 0px;
+  padding: 20px;
+}
+
+.profile-card-profile {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.profile-card-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f5d9e4;
+  border: 1px solid #ebc7d6;
+}
+
+.profile-card-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.profile-card-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  background: #ffd8e6;
+  color: #d14d8f;
+  border-radius: 999px;
+}
+
+.profile-card-badge-anak {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  background: #dae5ff;
+  color: #2d53ac;
+  border-radius: 999px;
+}
+
+.profile-card-editBtn {
+  border: none;
+  color: #ffffff;
+  background: #ff448f;
+  border: 1px solid white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.profile-card-editBtn:hover {
+  background: #ffffff;
+  color: #ff448f;
+  border: 1px solid white;
+}
+
+.profile-card-infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px 32px;
+  padding: 20px;
+}
+
+.profile-card-label {
+  margin: 0 0 4px;
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.profile-card-value {
+  margin: 0;
+  font-size: 15px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.matop{
+  margin-top: 40px;
+}

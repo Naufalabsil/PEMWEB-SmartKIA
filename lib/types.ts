@@ -39,6 +39,8 @@ export interface ChildProfile {
   statusGizi: string | null;
   tanggalLahir: string | null;
   jenisKelamin: "L" | "P";
+  golonganDarah: string | null;
+  tempatLahir: string,
 }
 
 export interface KbRecord {
@@ -66,7 +68,7 @@ export interface EducationItem {
 
 export interface DashboardData {
   mother: MotherProfile;
-  child: ChildProfile;
+  child: ChildProfile[];
   growthBbu: GrowthPoint[];
   growthBbpb: GrowthPoint[];
   kbRecords: KbRecord[];

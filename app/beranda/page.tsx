@@ -102,9 +102,11 @@ export default function BerandaPage() {
               </div>
             </div>
             <div className="divider" />
+
+            
             <div className="profile-mini">
               <div className="swatch blue" />
-              <div>
+              {/* <div>
                 <span className="eyebrow">Anak</span>
                 <strong>{data.child.nama}</strong>
                 <span>
@@ -116,11 +118,11 @@ export default function BerandaPage() {
                     ? ` · ${data.child.tinggiBadan} cm`
                     : ""}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="summary-footer">
-            {data.child.tanggalPemeriksaan ? (
+            {/* {data.child.tanggalPemeriksaan ? (
               <span>
                 Periksa terakhir:{" "}
                 <b>{formatLongDate(data.child.tanggalPemeriksaan)}</b>
@@ -133,7 +135,7 @@ export default function BerandaPage() {
             <span className="status-pill">
               <CheckCircle2 size={14} />
               Aktif
-            </span>
+            </span> */}
           </div>
         </article>
 
@@ -161,13 +163,13 @@ export default function BerandaPage() {
 
           {hasGrowthData ? (
             <>
-              <GrowthChart data={chartData} mode={mode} />
+              {/* <GrowthChart data={chartData} mode={mode} />
               {data.child.statusGizi ? (
                 <div className="growth-status">
                   <CheckCircle2 size={17} />
                   {data.child.statusGizi}
                 </div>
-              ) : null}
+              ) : null} */}
             </>
           ) : (
             <div

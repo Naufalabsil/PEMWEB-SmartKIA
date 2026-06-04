@@ -210,7 +210,6 @@ export default function LoginPage() {
           </label>
           <div className="phone-input">
             <div className="country-code" aria-hidden="true">
-              <span>ID</span>
               +62
             </div>
             <input

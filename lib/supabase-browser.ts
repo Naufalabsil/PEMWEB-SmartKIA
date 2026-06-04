@@ -12,13 +12,6 @@ export function createSupabaseBrowserClient(accessToken?: string) {
     return null;
     
   }
-  console.log(
-    process.env.NEXT_PUBLIC_SUPABASE_URL
-  );
-
-  console.log(
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     global: accessToken

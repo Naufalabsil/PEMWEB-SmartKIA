@@ -19,6 +19,8 @@ type AnakRow = {
   nama_anak: string;
   tanggal_lahir: string | null;
   jenis_kelamin: "L" | "P";
+  golongan_darah: string | null;
+  tempat_lahir: string;
 };
 
 type PertumbuhanRow = {
@@ -99,10 +101,9 @@ export async function loadDashboardData(
     // --- Profil Anak ---
     const { data: anakRows, error: anakError } = await supabase
       .from("anak")
-      .select("id,nama_anak,tanggal_lahir,jenis_kelamin,nama_ayah")
+      .select("id,nama_anak,tanggal_lahir,jenis_kelamin,nama_ayah,tempat_lahir, golongan_darah")
       .eq("ibu_id", ibu.id)
       .order("created_at", { ascending: true })
-      .limit(1)
       .returns<AnakRow[]>();
 
     if (anakError || !anakRows?.length) {
@@ -111,8 +112,8 @@ export async function loadDashboardData(
         "Data anak belum terdaftar. Hubungi petugas Posyandu.",
       );
     }
-
-    const anak = anakRows[0];
+    
+    const anakIds = anakRows.map((anak) => anak.id);
 
     // --- Ambil semua data parallel ---
     const [
@@ -125,7 +126,7 @@ export async function loadDashboardData(
         .select(
           "tanggal_periksa,berat_badan,tinggi_badan,usia_bulan,zscore_bbu,zscore_bbtb,status_gizi",
         )
-        .eq("anak_id", anak.id)
+        .in("anak_id", anakIds)
         .order("tanggal_periksa", { ascending: true })
         .returns<PertumbuhanRow[]>(),
       supabase
@@ -137,7 +138,7 @@ export async function loadDashboardData(
       supabase
         .from("vaksinasi_anak")
         .select("id,nama_vaksin,urutan,tanggal_diberikan,jadwal_ideal")
-        .eq("anak_id", anak.id)
+        .in("anak_id", anakIds)
         .order("jadwal_ideal", { ascending: true })
         .returns<VaccineRow[]>(),
     ]);
@@ -186,17 +187,24 @@ export async function loadDashboardData(
         namaSuami: ibu.nama_suami ?? null,
         tanggalLahir: ibu.tanggal_lahir ?? null,
       },
-      child: {
-        id: anak.id,
-        nama: anak.nama_anak,
-        usia: anak.tanggal_lahir ? `${ageInMonths(anak.tanggal_lahir)} bln` : "-",
-        beratBadan: lastGrowth ? Number(lastGrowth.berat_badan) : 0,
-        tinggiBadan: lastGrowth ? Number(lastGrowth.tinggi_badan) : 0,
-        tanggalPemeriksaan: lastGrowth?.tanggal_periksa ?? null,
-        statusGizi: lastGrowth?.status_gizi ?? null,
-        tanggalLahir: anak.tanggal_lahir ?? null,
-        jenisKelamin: anak.jenis_kelamin,
-      },
+      child: anakRows.map((item) => {
+      
+        return {
+          id: item.id,
+          nama: item.nama_anak,
+          usia: item.tanggal_lahir
+            ? `${ageInMonths(item.tanggal_lahir)} bln`
+            : "-",
+          beratBadan: lastGrowth ? Number(lastGrowth.berat_badan) : 0,
+          tinggiBadan: lastGrowth ? Number(lastGrowth.tinggi_badan) : 0,
+          tanggalPemeriksaan: lastGrowth?.tanggal_periksa ?? null,
+          statusGizi: lastGrowth?.status_gizi ?? null,
+          tanggalLahir: item.tanggal_lahir ?? null,
+          jenisKelamin: item.jenis_kelamin,
+          golonganDarah: item.golongan_darah,
+          tempatLahir: item.tempat_lahir,
+        };
+      }),
       growthBbu: buildGrowth(growthRows ?? [], "bbu"),
       growthBbpb: buildGrowth(growthRows ?? [], "bbpb"),
       kbRecords,
