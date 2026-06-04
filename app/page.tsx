@@ -1,4 +1,6 @@
 "use client";
+import { getSession } from "@/lib/session";
+
 
 import { AlertTriangle, HeartPulse, Send, ShieldCheck, Smartphone, TimerReset } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -84,6 +86,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
+  
 
   async function handleVerifyOtp() {
     if (!canSubmitOtp) {
@@ -100,6 +103,7 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+    
   }
 
   function handleOtpChange(index: number, event: ChangeEvent<HTMLInputElement>) {
@@ -269,3 +273,4 @@ export default function LoginPage() {
     </MobileShell>
   );
 }
+console.log("SESSION:", getSession());

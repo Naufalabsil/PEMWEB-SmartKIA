@@ -35,7 +35,7 @@ export async function verifyOtp(
   const { data, error } = await supabase.functions.invoke("verify-otp", {
     body: { nomor_wa: normalized, kode },
   });
-
+  console.log("VERIFY RESPONSE:", data);
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
 
@@ -48,5 +48,7 @@ export async function verifyOtp(
   };
 
   saveSession(session);
+  console.log("SETELAH SAVE");
+  console.log(localStorage.getItem("smartkia_session"));
   return session;
 }
