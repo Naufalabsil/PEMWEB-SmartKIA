@@ -39,6 +39,12 @@ export interface ChildProfile {
   statusGizi: string | null;
   tanggalLahir: string | null;
   jenisKelamin: "L" | "P";
+  growthBbu: GrowthPoint[];
+  growthBbpb: GrowthPoint[];
+  nextVaccine: VaccineRecord | null;
+  allVaccines: VaccineRecord[];
+  golonganDarah: string | null;
+  tempatLahir: string,
 }
 
 export interface KbRecord {
@@ -66,13 +72,12 @@ export interface EducationItem {
 
 export interface DashboardData {
   mother: MotherProfile;
-  child: ChildProfile;
-  growthBbu: GrowthPoint[];
+  child: ChildProfile;       // tetap, anak pertama (backward compat)
+  children: ChildProfile[];  // semua anak
+  growthBbu: GrowthPoint[];  // tetap, milik anak pertama
   growthBbpb: GrowthPoint[];
   kbRecords: KbRecord[];
-  /** null jika belum ada catatan KB sama sekali */
   nextKb: KbRecord | null;
-  /** null jika semua vaksin sudah diberikan */
   nextVaccine: VaccineRecord | null;
   allVaccines: VaccineRecord[];
   education: EducationItem[];

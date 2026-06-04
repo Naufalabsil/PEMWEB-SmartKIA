@@ -16,7 +16,6 @@ export async function requestOtp(nomorWa: string): Promise<void> {
   const { data, error } = await supabase.functions.invoke("send-otp", {
     body: { nomor_wa: normalized },
   });
-
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
 }

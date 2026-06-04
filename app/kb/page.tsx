@@ -14,9 +14,30 @@ export default function KbPage() {
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    void loadDashboardData(getSession()).then(setData);
-  }, []);
+  void loadDashboardData(getSession())
+    .then((result) => {
+      console.log("BERHASIL:", result);
+      setData(result);
+    })
+    .catch((err) => {
+      console.error("LOAD ERROR:", err);
+    });
+}, []);
 
+useEffect(() => {
+  console.log("DATA BERUBAH:", data);
+  console.log("NEXT KB:", data?.nextKb);
+  console.log("KB RECORDS:", data?.kbRecords);
+}, [data]);
+
+  useEffect(() => {
+  void loadDashboardData(getSession())
+    .then((result) => {
+      console.log("DATA:", result);
+      setData(result);
+    })
+    .catch(console.error);
+}, []);
   const nextKb = data?.nextKb;
   const sortedRecords = useMemo(
     () =>
@@ -25,14 +46,34 @@ export default function KbPage() {
       ),
     [data?.kbRecords],
   );
+  console.log("DATA:", data);
+console.log("NEXT KB:", data?.nextKb);
+console.log("KB RECORDS:", data?.kbRecords);
+if (!data) {
+  return (
+    <MobileShell nav>
+      <div className="loading-card">
+        Memuat jadwal KB...
+      </div>
+    </MobileShell>
+  );
+}
 
-  if (!data || !nextKb) {
-    return (
-      <MobileShell nav>
-        <div className="loading-card">Memuat jadwal KB...</div>
-      </MobileShell>
-    );
-  }
+if (!nextKb) {
+  return (
+    <MobileShell nav>
+      <section className="page with-header">
+        <header className="green-header">
+          <h1>KB Suntik</h1>
+        </header>
+
+        <div className="loading-card">
+          Belum ada riwayat atau jadwal KB.
+        </div>
+      </section>
+    </MobileShell>
+  );
+} 
 
   const diff = daysBetween(new Date(), new Date(nextKb.tanggalSuntik));
   const overdue = diff < 0;
@@ -59,7 +100,7 @@ export default function KbPage() {
             <Bell size={17} />
             Notifikasi WhatsApp Aktif
           </h3>
-          <p>Pengingat otomatis dikirim ke {displayWa(data.mother.nomorWa)} pada:</p>
+          <p>Pengingat otomatis dikirim ke Nomor WhatsApp 0{displayWa(data.mother.nomorWa)} pada:</p>
           <div className="pill-row">
             <span className="soft-pill">H-3 - 08:00 WIB</span>
             <span className="soft-pill">H-1 - 08:00 WIB</span>
