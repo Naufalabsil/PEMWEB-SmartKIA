@@ -4,7 +4,7 @@ import { Bell, Check, Clock3, Syringe, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { MobileShell } from "@/components/mobile-shell";
-import { daysBetween, formatLongDate, kbTypeLabel, relativeDayLabel } from "@/lib/date";
+import { daysBetween, formatLongDate, kbTypeLabel, parseISODate, relativeDayLabel } from "@/lib/date";
 import { loadDashboardData } from "@/lib/dashboard-data";
 import { displayWa } from "@/lib/phone";
 import { getSession } from "@/lib/session";
@@ -75,7 +75,7 @@ if (!nextKb) {
   );
 } 
 
-  const diff = daysBetween(new Date(), new Date(nextKb.tanggalSuntik));
+  const diff = daysBetween(new Date(), parseISODate(nextKb.tanggalBerikutnya));
   const overdue = diff < 0;
 
   return (
@@ -87,11 +87,14 @@ if (!nextKb) {
 
         <article className="kb-hero">
           <span>{overdue ? "Suntik KB Terlewat" : "Suntik KB Berikutnya"}</span>
-          <h2>{formatLongDate(nextKb.tanggalSuntik)}</h2>
-          <p>{kbTypeLabel(nextKb.jenisKb)} {nextKb.jenisKb === "3_bulan" ? "(Depo Provera)" : ""}</p>
+          <h2>{formatLongDate(nextKb.tanggalBerikutnya)}</h2>
+          <p>
+            {kbTypeLabel(nextKb.jenisKb)} {nextKb.jenisKb === "3_bulan" ? "(Depo Provera)" : ""}
+            {" "} - Terakhir suntik {formatLongDate(nextKb.tanggalSuntik)}
+          </p>
           <span className="mini-badge">
             {overdue ? <TriangleAlert size={13} /> : <Clock3 size={13} />}
-            {relativeDayLabel(nextKb.tanggalSuntik)}
+            {relativeDayLabel(nextKb.tanggalBerikutnya)}
           </span>
         </article>
 

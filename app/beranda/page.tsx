@@ -250,8 +250,8 @@ console.log("CHILDREN", data?.children);
           {data.nextKb ? (
             <Link className="alert-card kb card" href="/kb">
               <h3>Suntik KB</h3>
-              <strong>{relativeDayLabel(data.nextKb.tanggalSuntik)}</strong>
-              <span>{formatLongDate(data.nextKb.tanggalSuntik)}</span>
+              <strong>{relativeDayLabel(data.nextKb.tanggalBerikutnya)}</strong>
+              <span>{formatLongDate(data.nextKb.tanggalBerikutnya)}</span>
               <span className="mini-badge">
                 <AlertTriangle size={13} />
                 {data.nextKb.status === "overdue" ? "TERLAMBAT" : "SEGERA"}

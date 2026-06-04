@@ -4,7 +4,7 @@ import { AlertTriangle, Bell, Check, Clock3, Syringe, TriangleAlert } from "luci
 import { useEffect, useMemo, useState } from "react";
 
 import { MobileShell } from "@/components/mobile-shell";
-import { daysBetween, formatLongDate, kbTypeLabel, relativeDayLabel } from "@/lib/date";
+import { daysBetween, formatLongDate, kbTypeLabel, parseISODate, relativeDayLabel } from "@/lib/date";
 import { loadDashboardData, DashboardLoadError } from "@/lib/dashboard-data";
 import { displayWa } from "@/lib/phone";
 import { getSession } from "@/lib/session";
@@ -66,7 +66,7 @@ export default function KbPage() {
             <Syringe size={44} color="#06a66a" />
             <h1>Belum Ada Catatan KB</h1>
             <p>
-              Data suntik KB belum tersedia. Hubungi bidan atau petugas Posyandu
+              Data suntik KB belum tersedia. Hubungi bidan
               untuk mendaftarkan jadwal KB Anda.
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function KbPage() {
     );
   }
 
-  const diff = nextKb ? daysBetween(new Date(), new Date(nextKb.tanggalSuntik)) : 0;
+  const diff = nextKb ? daysBetween(new Date(), parseISODate(nextKb.tanggalBerikutnya)) : 0;
   const overdue = nextKb ? diff < 0 : false;
 
   return (
@@ -88,14 +88,15 @@ export default function KbPage() {
         {nextKb ? (
           <article className="kb-hero">
             <span>{overdue ? "Suntik KB Terlewat" : "Suntik KB Berikutnya"}</span>
-            <h2>{formatLongDate(nextKb.tanggalSuntik)}</h2>
+            <h2>{formatLongDate(nextKb.tanggalBerikutnya)}</h2>
             <p>
               {kbTypeLabel(nextKb.jenisKb)}{" "}
               {nextKb.jenisKb === "3_bulan" ? "(Depo Provera)" : ""}
+              {" "} - Terakhir suntik {formatLongDate(nextKb.tanggalSuntik)}
             </p>
             <span className="mini-badge">
               {overdue ? <TriangleAlert size={13} /> : <Clock3 size={13} />}
-              {relativeDayLabel(nextKb.tanggalSuntik)}
+              {relativeDayLabel(nextKb.tanggalBerikutnya)}
             </span>
           </article>
         ) : null}
@@ -103,7 +104,7 @@ export default function KbPage() {
         <article className="notification-card">
           <h3>
             <Bell size={17} />
-            Notifikasi WhatsApp Aktif
+            Notifikasi Pengingat WhatsApp
           </h3>
           <p>
             Pengingat otomatis dikirim ke{" "}

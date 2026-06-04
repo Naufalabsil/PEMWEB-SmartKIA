@@ -178,7 +178,7 @@ export default function LoginPage() {
 
             <div className="warning-note">
               <AlertTriangle size={16} />
-              <span>Jangan bagikan kode OTP kepada siapapun, termasuk petugas Posyandu.</span>
+              <span>Jangan bagikan kode OTP kepada siapapun</span>
             </div>
 
             {error ? <div className="error-note">{error}</div> : null}
@@ -196,7 +196,7 @@ export default function LoginPage() {
             <HeartPulse size={38} strokeWidth={1.9} />
           </div>
           <div>
-            <h1>Posyandu Digital</h1>
+            <h1>SmartKIA</h1>
             <p>Pantau kesehatan ibu &amp; anak dengan mudah dan terpadu</p>
           </div>
         </div>
@@ -254,7 +254,7 @@ export default function LoginPage() {
 
             <p className="modal-description">
               Maaf, nomor WhatsApp Anda belum
-              terdaftar dalam sistem Posyandu.
+              terdaftar dalam sistem.
               Silakan menghubungi bidan untuk
               proses pendaftaran akun.
             </p>

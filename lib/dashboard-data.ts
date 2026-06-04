@@ -1,4 +1,4 @@
-import { addDays, daysBetween, toISODate } from "@/lib/date";
+import { addDays, daysBetween, parseISODate, toISODate } from "@/lib/date";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type { ChildProfile, DashboardData, KbRecord, SmartKiaSession, TimelineStatus } from "@/lib/types";
 
@@ -144,19 +144,18 @@ export async function loadDashboardData(
     const today = new Date();
 
     // --- KB Records ---
-    const kbRecords = (kbRows ?? []).map<KbRecord>((row) => ({
+    const kbRecords = (kbRows ?? []).map<KbRecord>((row, index, rows) => ({
       id: row.id,
       jenisKb: row.jenis_kb,
       tanggalSuntik: row.tanggal_suntik,
       tanggalBerikutnya: row.tanggal_berikutnya,
       catatan: row.catatan ?? "-",
-      status: getKbStatus(row.tanggal_berikutnya, today),
+      status: getKbStatus(row.tanggal_berikutnya, today, index < rows.length - 1),
     }));
 
     const nextKb =
-      kbRecords.find((r) => r.status === "overdue") ??
       kbRecords.find((r) => r.status === "next") ??
-      kbRecords[kbRecords.length - 1] ??
+      kbRecords.find((r) => r.status === "overdue") ??
       null;
 
     // --- Build children array ---
@@ -255,10 +254,12 @@ export async function loadDashboardData(
   }
 }
 
-function getKbStatus(date: string, today: Date): TimelineStatus {
-  const diff = daysBetween(today, new Date(date));
+function getKbStatus(date: string, today: Date, hasLaterRecord = false): TimelineStatus {
+  if (hasLaterRecord) return "done";
+
+  const diff = daysBetween(today, parseISODate(date));
   if (diff < 0) return "overdue";
-  return diff <= 90 ? "next" : "done";
+  return "next";
 }
 
 function ageInYears(date: string): number {
