@@ -16,6 +16,7 @@ export interface GrowthPoint {
 
 export interface MotherProfile {
   id: string;
+  nik: string;
   nama: string;
   usia: string;
   beratBadan: number;
@@ -31,6 +32,7 @@ export interface MotherProfile {
 export interface ChildProfile {
   id: string;
   nama: string;
+  nik: string;
   usia: string;
   beratBadan: number;
   tinggiBadan: number;

@@ -9,20 +9,27 @@ import { loadDashboardData, DashboardLoadError } from "@/lib/dashboard-data";
 import { clearSession, getSession } from "@/lib/session";
 import type { DashboardData, GrowthMode } from "@/lib/types";
 import { formatDate } from "@/utils/formatdate";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Navigation } from "swiper/modules";
+
+
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 export default function ProfilPage() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-    const formatPhone = (phone?: string) => {
-      if (!phone) return "-";
-    
-      const local = phone.replace(/^62/, "0");
-    
-      return `${local.slice(0, 4)}-${local.slice(4, 8)}-${local.slice(8)}`;
-    };
-    
+  const formatPhone = (phone?: string) => {
+    if (!phone) return "-";
+
+    const local = phone.replace(/^62/, "0");
+
+    return `${local.slice(0, 4)}-${local.slice(4, 8)}-${local.slice(8)}`;
+  };
+
 
   useEffect(() => {
     loadDashboardData(getSession())
@@ -95,56 +102,66 @@ export default function ProfilPage() {
           </div>
         </div>
 
-        {data?.children?.map((anak) => (
-          <div className="profile-card matop" key={anak.id}>
-          <div className="profile-card-header-anak">
-            <div className="profile-card-profile">
-              <div>
-                <h2 className="profile-card-name">{anak.nama}</h2>
-                <span className="profile-card-badge-anak">Anak</span>
+        <Swiper
+          modules={[Pagination, Navigation]}
+          spaceBetween={20}
+          slidesPerView={1}
+          pagination={{ clickable: true }}
+        >
+          {data?.children?.map((anak) => (
+            <SwiperSlide key={anak.id}>
+              <div className="profile-card matop">
+                <div className="profile-card-header-anak">
+                  <div className="profile-card-profile">
+                    <div>
+                      <h2 className="profile-card-name">{anak.nama}</h2>
+                      <span className="profile-card-badge-anak">Anak</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="profile-card-infoGrid">
+                  <div>
+                    <p className="profile-card-label">TGL LAHIR</p>
+                    <p className="profile-card-value">
+                      {formatDate(anak.tanggalLahir)}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="profile-card-label">UMUR</p>
+                    <p className="profile-card-value">{anak.usia}</p>
+                  </div>
+
+                  <div>
+                    <p className="profile-card-label">JENIS KELAMIN</p>
+                    <p className="profile-card-value">{anak.jenisKelamin}</p>
+                  </div>
+
+                  <div>
+                    <p className="profile-card-label">BERAT BADAN</p>
+                    <p className="profile-card-value">{anak.beratBadan} kg</p>
+                  </div>
+
+                  <div>
+                    <p className="profile-card-label">TINGGI BADAN</p>
+                    <p className="profile-card-value">{anak.tinggiBadan} cm</p>
+                  </div>
+
+                  <div>
+                    <p className="profile-card-label">GOL. DARAH</p>
+                    <p className="profile-card-value">{anak.golonganDarah}</p>
+                  </div>
+
+                  <div>
+                    <p className="profile-card-label">TEMPAT LAHIR</p>
+                    <p className="profile-card-value">{anak.tempatLahir}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="profile-card-infoGrid">
-            <div>
-              <p className="profile-card-label">TGL LAHIR</p>
-              <p className="profile-card-value">{formatDate(anak.tanggalLahir)}</p>
-            </div>
-
-            <div>
-              <p className="profile-card-label">UMUR</p>
-              <p className="profile-card-value">{anak.usia}</p>
-            </div>
-
-            <div>
-              <p className="profile-card-label">Jenis Kelamin</p>
-              <p className="profile-card-value">{anak.jenisKelamin}</p>
-            </div>
-
-
-            <div>
-              <p className="profile-card-label">BERAT BADAN</p>
-              <p className="profile-card-value">{anak.beratBadan}kg</p>
-            </div>
-
-            <div>
-              <p className="profile-card-label">TINGGI BADAN</p>
-              <p className="profile-card-value">{anak.tinggiBadan}cm</p>
-            </div>
-
-            <div>
-              <p className="profile-card-label">GOL. DARAH</p>
-              <p className="profile-card-value">{anak.golonganDarah}</p>
-            </div>
-
-            <div>
-              <p className="profile-card-label">TEMPAT LAHIR</p>
-              <p className="profile-card-value">{anak.tempatLahir}</p>
-            </div>
-          </div>
-        </div>
-        ))}
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </section>
     </MobileShell>
   );

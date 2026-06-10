@@ -4,6 +4,7 @@ import type { ChildProfile, DashboardData, KbRecord, SmartKiaSession, TimelineSt
 
 type IbuRow = {
   id: string;
+  nik: string;
   nama_lengkap: string;
   nomor_wa: string;
   tanggal_lahir: string | null;
@@ -16,6 +17,7 @@ type IbuRow = {
 
 type AnakRow = {
   id: string;
+  nik: string;
   nama_anak: string;
   tanggal_lahir: string | null;
   jenis_kelamin: "L" | "P";
@@ -84,7 +86,7 @@ export async function loadDashboardData(
     const { data: ibu, error: ibuError } = await supabase
       .from("ibu")
       .select(
-  "id,nama_lengkap,nomor_wa,tanggal_lahir,golongan_darah,alamat,nama_suami"
+  "id,nama_lengkap,nomor_wa,tanggal_lahir,golongan_darah,alamat,nama_suami,NIK"
 )
       .eq("id", session.ibuId)
       .single<IbuRow>();
@@ -96,7 +98,7 @@ export async function loadDashboardData(
     // --- Profil Anak (semua anak) ---
     const { data: anakRows, error: anakError } = await supabase
       .from("anak")
-      .select("id,nama_anak,tanggal_lahir,jenis_kelamin,nama_ayah,tempat_lahir, golongan_darah")
+      .select("id,nama_anak,tanggal_lahir,jenis_kelamin,nama_ayah,tempat_lahir, golongan_darah,NIK")
       .eq("ibu_id", ibu.id)
       .order("created_at", { ascending: true })
       .returns<AnakRow[]>();
@@ -172,6 +174,7 @@ export async function loadDashboardData(
 
       return {
         id: a.id,
+        nik:a.nik,
         nama: a.nama_anak,
         usia: a.tanggal_lahir ? `${ageInMonths(a.tanggal_lahir)} bln` : "-",
         beratBadan: lastGrowth ? Number(lastGrowth.berat_badan) : 0,
@@ -204,7 +207,7 @@ export async function loadDashboardData(
     });
 
     const emptyChild: ChildProfile = {
-      id: "", nama: "Belum ada data anak", usia: "-",
+      id: "", nik:"", nama: "Belum ada data anak", usia: "-",
       beratBadan: 0, tinggiBadan: 0, tanggalPemeriksaan: null,
       statusGizi: null, tanggalLahir: null, jenisKelamin: "L",
       golonganDarah: null, tempatLahir: "",
@@ -216,6 +219,7 @@ export async function loadDashboardData(
     return {
       mother: {
         id: ibu.id,
+        nik: ibu.nik,
         nama: ibu.nama_lengkap,
         usia: ibu.tanggal_lahir ? `${ageInYears(ibu.tanggal_lahir)} tahun` : "-",
         beratBadan: ibu.berat_badan ?? 0,

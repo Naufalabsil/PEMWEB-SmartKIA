@@ -60,14 +60,14 @@ export default function KbPage() {
       <MobileShell nav>
         <section className="page with-header">
           <header className="green-header">
-            <h1>KB Suntik</h1>
+            <h1>Suntik Vaksin</h1>
           </header>
           <div className="empty-screen" style={{ minHeight: "calc(100dvh - 160px)" }}>
             <Syringe size={44} color="#06a66a" />
-            <h1>Belum Ada Catatan KB</h1>
+            <h1>Belum Ada Catatan Vaksin</h1>
             <p>
-              Data suntik KB belum tersedia. Hubungi bidan
-              untuk mendaftarkan jadwal KB Anda.
+              Data suntik Vaksin belum tersedia. Hubungi bidan
+              untuk mendaftarkan jadwal Vaksin Anda.
             </p>
           </div>
         </section>

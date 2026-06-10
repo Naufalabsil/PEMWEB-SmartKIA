@@ -26,6 +26,7 @@ export async function verifyOtp(
 ): Promise<SmartKiaSession> {
   const normalized = normalizeIndonesianWa(nomorWa);
   const supabase = createSupabaseBrowserClient();
+  console.log(supabase);
 
   if (!supabase) {
     throw new Error("Konfigurasi Supabase tidak ditemukan. Hubungi administrator.");
