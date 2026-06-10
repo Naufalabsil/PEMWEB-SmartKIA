@@ -1160,6 +1160,7 @@ button {
   display: flex;
   gap: 12px;
   align-items: center;
+  width: 100%;
 }
 
 .profile-card-avatar {
@@ -1172,7 +1173,14 @@ button {
 
 .profile-card-name {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 1600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.profile-card-nik {
+  font-size: 14px;
+  font-weight: 400;
   color: #ffffff;
   margin: 0;
 }
@@ -1239,4 +1247,11 @@ button {
 
 .matop{
   margin-top: 40px;
+}
+
+.profile-card-namecard{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
 }

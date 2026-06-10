@@ -4,7 +4,7 @@ import type { ChildProfile, DashboardData, KbRecord, SmartKiaSession, TimelineSt
 
 type IbuRow = {
   id: string;
-  nik: string;
+  NIK: number;
   nama_lengkap: string;
   nomor_wa: string;
   tanggal_lahir: string | null;
@@ -17,7 +17,7 @@ type IbuRow = {
 
 type AnakRow = {
   id: string;
-  nik: string;
+  NIK: number;
   nama_anak: string;
   tanggal_lahir: string | null;
   jenis_kelamin: "L" | "P";
@@ -174,7 +174,7 @@ export async function loadDashboardData(
 
       return {
         id: a.id,
-        nik:a.nik,
+        nik:a.NIK,
         nama: a.nama_anak,
         usia: a.tanggal_lahir ? `${ageInMonths(a.tanggal_lahir)} bln` : "-",
         beratBadan: lastGrowth ? Number(lastGrowth.berat_badan) : 0,
@@ -207,7 +207,7 @@ export async function loadDashboardData(
     });
 
     const emptyChild: ChildProfile = {
-      id: "", nik:"", nama: "Belum ada data anak", usia: "-",
+      id: "", nik:0, nama: "Belum ada data anak", usia: "-",
       beratBadan: 0, tinggiBadan: 0, tanggalPemeriksaan: null,
       statusGizi: null, tanggalLahir: null, jenisKelamin: "L",
       golonganDarah: null, tempatLahir: "",
@@ -219,7 +219,7 @@ export async function loadDashboardData(
     return {
       mother: {
         id: ibu.id,
-        nik: ibu.nik,
+        nik: ibu.NIK,
         nama: ibu.nama_lengkap,
         usia: ibu.tanggal_lahir ? `${ageInYears(ibu.tanggal_lahir)} tahun` : "-",
         beratBadan: ibu.berat_badan ?? 0,

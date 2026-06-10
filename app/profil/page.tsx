@@ -62,7 +62,7 @@ export default function ProfilPage() {
         <div className="profile-card">
           <div className="profile-card-header">
             <div className="profile-card-profile">
-              <div>
+              <div className="profile-card-namecard">
                 <h2 className="profile-card-name">{data?.mother.nama}</h2>
                 <span className="profile-card-badge">Ibu</span>
               </div>
@@ -70,6 +70,11 @@ export default function ProfilPage() {
           </div>
 
           <div className="profile-card-infoGrid">
+            <div>
+              <p className="profile-card-label">NIK</p>
+              <p className="profile-card-value">{data?.mother.nik}</p>
+            </div>
+
             <div>
               <p className="profile-card-label">TGL LAHIR</p>
               <p className="profile-card-value">{formatDate(data?.mother.tanggalLahir)}</p>
@@ -113,7 +118,7 @@ export default function ProfilPage() {
               <div className="profile-card matop">
                 <div className="profile-card-header-anak">
                   <div className="profile-card-profile">
-                    <div>
+                    <div className="profile-card-namecard">
                       <h2 className="profile-card-name">{anak.nama}</h2>
                       <span className="profile-card-badge-anak">Anak</span>
                     </div>
@@ -121,6 +126,10 @@ export default function ProfilPage() {
                 </div>
 
                 <div className="profile-card-infoGrid">
+                  <div>
+                    <p className="profile-card-label">NIK</p>
+                    <p className="profile-card-value">{anak.nik}</p>
+                  </div>
                   <div>
                     <p className="profile-card-label">TGL LAHIR</p>
                     <p className="profile-card-value">
@@ -146,6 +155,11 @@ export default function ProfilPage() {
                   <div>
                     <p className="profile-card-label">TINGGI BADAN</p>
                     <p className="profile-card-value">{anak.tinggiBadan} cm</p>
+                  </div>
+
+                  <div>
+                    <p className="profile-card-label">TANGGAL PEMERIKSAAN</p>
+                    <p className="profile-card-value">{anak.tanggalPemeriksaan}</p>
                   </div>
 
                   <div>
