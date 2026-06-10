@@ -1,0 +1,62 @@
+.card {
+    background: #f8f1df;
+    border-radius: 24px;
+    padding: 24px;
+    margin-top: 20px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #38413a;
+  }
+  
+  .status {
+    font-size: 14px;
+    font-weight: 600;
+    color: #9ba89c;
+  }
+  
+  .vaccineName {
+    margin: 10px 0 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #9a6a00;
+  }
+  
+  .info {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #71806f;
+  }
+  
+  .badges {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  
+  .badgetrue {
+    background: #d2f7b8;
+    color: #be9b55;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .badgefalse {
+    background: #f7b8b8;
+    color: #6b4900;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }

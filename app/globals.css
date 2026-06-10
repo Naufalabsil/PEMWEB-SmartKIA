@@ -302,6 +302,10 @@ button {
   padding: 26px 20px 18px;
   background: var(--primary);
   color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .green-header h1 {
@@ -1062,7 +1066,7 @@ button {
   position: absolute;
   right: 0;
   top: calc(100% + 6px);
-  background: var(--surface-1);
+  background: white;
   border: 1px solid var(--border);
   border-radius: 10px;
   min-width: 190px;
@@ -1071,6 +1075,8 @@ button {
   margin: 0;
   padding: 4px;
   overflow: hidden;
+  -webkit-box-shadow: 2px 6px 17px 3px rgba(0,0,0,0.47); 
+  box-shadow: 0px 6px 42px 3px rgba(0, 0, 0, 0.278);
 }
 
 .child-option {
@@ -1081,10 +1087,12 @@ button {
   border-radius: 7px;
   cursor: pointer;
   transition: background 0.12s;
+  color: black;
+  background-color: white;
 }
 
 .child-option:hover {
-  background: var(--surface-2);
+  background: var(--pink-subtle, #fdf2f5);
 }
 
 .child-option.active {

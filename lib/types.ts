@@ -64,6 +64,9 @@ export interface VaccineRecord {
   urutan: number;
   tanggalDiberikan?: string | null;
   jadwalIdeal: string;
+  h3: boolean;
+  h1: boolean;
+  usia: string;
 }
 
 export interface EducationItem {

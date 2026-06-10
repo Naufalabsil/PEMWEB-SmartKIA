@@ -1,0 +1,92 @@
+/* VaccineList.module.css */
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #375d4d;
+    margin-bottom: 1rem;
+  }
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+/* Sudah vaksin */
+.cardCompleted {
+    background: #dff5e8;
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    align-items: start;
+    flex-direction: row;
+    gap: 16px;
+  }
+  
+  .iconCompleted {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #00b85c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Belum vaksin */
+  .cardPending {
+    background: #ffe4e6;
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+  }
+  
+  .iconPending {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .completed {
+    color: #10b981;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .pending {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+
+  .content {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .content h3 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  .age {
+    margin: 4px 0;
+    font-size: 14px;
+  }
+  
+  .completed,
+  .pending {
+    margin: 0;
+    font-size: 14px;
+  }

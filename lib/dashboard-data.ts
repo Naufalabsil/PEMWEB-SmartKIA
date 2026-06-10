@@ -4,7 +4,7 @@ import type { ChildProfile, DashboardData, KbRecord, SmartKiaSession, TimelineSt
 
 type IbuRow = {
   id: string;
-  NIK: number;
+  nik: number;
   nama_lengkap: string;
   nomor_wa: string;
   tanggal_lahir: string | null;
@@ -17,7 +17,7 @@ type IbuRow = {
 
 type AnakRow = {
   id: string;
-  NIK: number;
+  nik: number;
   nama_anak: string;
   tanggal_lahir: string | null;
   jenis_kelamin: "L" | "P";
@@ -49,6 +49,9 @@ type VaccineRow = {
   urutan: number;
   tanggal_diberikan: string | null;
   jadwal_ideal: string;
+  notif_h3_sent: boolean;
+  notif_h1_sent: boolean;
+  untuk_usia: string;
 };
 
 export class DashboardLoadError extends Error {
@@ -86,7 +89,7 @@ export async function loadDashboardData(
     const { data: ibu, error: ibuError } = await supabase
       .from("ibu")
       .select(
-  "id,nama_lengkap,nomor_wa,tanggal_lahir,golongan_darah,alamat,nama_suami,NIK"
+  "id,nama_lengkap,nomor_wa,tanggal_lahir,golongan_darah,alamat,nama_suami,nik"
 )
       .eq("id", session.ibuId)
       .single<IbuRow>();
@@ -98,7 +101,7 @@ export async function loadDashboardData(
     // --- Profil Anak (semua anak) ---
     const { data: anakRows, error: anakError } = await supabase
       .from("anak")
-      .select("id,nama_anak,tanggal_lahir,jenis_kelamin,nama_ayah,tempat_lahir, golongan_darah,NIK")
+      .select("id,nama_anak,tanggal_lahir,jenis_kelamin,nama_ayah,tempat_lahir, golongan_darah,nik")
       .eq("ibu_id", ibu.id)
       .order("created_at", { ascending: true })
       .returns<AnakRow[]>();
@@ -132,7 +135,7 @@ export async function loadDashboardData(
 
           supabase
             .from("vaksinasi_anak")
-            .select("id,nama_vaksin,urutan,tanggal_diberikan,jadwal_ideal")
+            .select("id,nama_vaksin,urutan,tanggal_diberikan,jadwal_ideal,notif_h3_sent,notif_h1_sent")
             .eq("anak_id", a.id)
             .order("jadwal_ideal", { ascending: true })
             .returns<VaccineRow[]>(),
@@ -174,7 +177,7 @@ export async function loadDashboardData(
 
       return {
         id: a.id,
-        nik:a.NIK,
+        nik:a.nik,
         nama: a.nama_anak,
         usia: a.tanggal_lahir ? `${ageInMonths(a.tanggal_lahir)} bln` : "-",
         beratBadan: lastGrowth ? Number(lastGrowth.berat_badan) : 0,
@@ -194,6 +197,9 @@ export async function loadDashboardData(
               urutan: nextVaccineRow.urutan,
               tanggalDiberikan: nextVaccineRow.tanggal_diberikan,
               jadwalIdeal: nextVaccineRow.jadwal_ideal,
+              h3: nextVaccineRow.notif_h3_sent,
+              h1: nextVaccineRow.notif_h1_sent,
+              usia: nextVaccineRow.untuk_usia,
             }
           : null,
         allVaccines: vaccineRows.map((r) => ({
@@ -202,6 +208,9 @@ export async function loadDashboardData(
           urutan: r.urutan,
           tanggalDiberikan: r.tanggal_diberikan,
           jadwalIdeal: r.jadwal_ideal,
+          h3: r.notif_h3_sent,
+          h1: r.notif_h1_sent,
+          usia: r.untuk_usia,
         })),
       };
     });
@@ -219,7 +228,7 @@ export async function loadDashboardData(
     return {
       mother: {
         id: ibu.id,
-        nik: ibu.NIK,
+        nik: ibu.nik,
         nama: ibu.nama_lengkap,
         usia: ibu.tanggal_lahir ? `${ageInYears(ibu.tanggal_lahir)} tahun` : "-",
         beratBadan: ibu.berat_badan ?? 0,
