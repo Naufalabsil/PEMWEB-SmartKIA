@@ -1137,7 +1137,7 @@ button {
 .profile-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-cen;
   margin-bottom: 24px;
   background: #ff448f;
   border: 1px solid #ebc7d6;
@@ -1172,7 +1172,7 @@ button {
 }
 
 .profile-card-name {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 1600;
   color: #ffffff;
   margin: 0;
@@ -1189,7 +1189,7 @@ button {
   display: inline-block;
   margin-top: 4px;
   padding: 2px 8px;
-  font-size: 11px;
+  font-size: 15px;
   background: #ffd8e6;
   color: #d14d8f;
   border-radius: 999px;
@@ -1199,7 +1199,7 @@ button {
   display: inline-block;
   margin-top: 4px;
   padding: 2px 8px;
-  font-size: 11px;
+  font-size: 15px;
   background: #dae5ff;
   color: #2d53ac;
   border-radius: 999px;
@@ -1254,4 +1254,5 @@ button {
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  align-items: center;
 }
