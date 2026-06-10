@@ -19,7 +19,7 @@ interface GrowthChartProps {
 }
 
 export function GrowthChart({ data, mode }: GrowthChartProps) {
-  const axisLabel = mode === "bbu" ? "Usia bulan" : "Panjang/Tinggi cm";
+  const axisLabel = mode === "bbpb" ? "Panjang/Tinggi cm" : "Usia bulan";
 
   return (
     <div className="chart-wrap">
@@ -127,8 +127,14 @@ function GrowthTooltip({
         {mode === "bbu" ? "Usia" : "PB/TB"} {label}
         {mode === "bbu" ? " bulan" : " cm"}
       </strong>
-      <small style={{ display: "block", color: "#6f8179" }}>Median WHO: {point.p50} kg</small>
-      {anak ? <small style={{ display: "block", color: "#ff7654" }}>Anak: {anak} kg</small> : null}
+      <small style={{ display: "block", color: "#6f8179" }}>
+        Median WHO: {point.p50} {mode === "tbu" ? "cm" : "kg"}
+      </small>
+      {anak ? (
+        <small style={{ display: "block", color: "#ff7654" }}>
+          Anak: {anak} {mode === "tbu" ? "cm" : "kg"}
+        </small>
+      ) : null}
       {point.zscore !== undefined ? (
         <small style={{ display: "block", color: "#06a66a" }}>Z-score: {point.zscore}</small>
       ) : null}

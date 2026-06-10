@@ -1,4 +1,4 @@
-export type GrowthMode = "bbu" | "bbpb";
+export type GrowthMode = "bbu" | "tbu" | "bbpb";
 
 export type KbType = "1_bulan" | "3_bulan";
 
@@ -41,7 +41,13 @@ export interface ChildProfile {
   statusGizi: string | null;
   tanggalLahir: string | null;
   jenisKelamin: "L" | "P";
+  imt: number | null;
+  zscoreBbu: number | null;
+  zscoreTbu: number | null;
+  zscoreBbtb: number | null;
+  zscoreImtu: number | null;
   growthBbu: GrowthPoint[];
+  growthTbu: GrowthPoint[];
   growthBbpb: GrowthPoint[];
   nextVaccine: VaccineRecord | null;
   allVaccines: VaccineRecord[];
